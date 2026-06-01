@@ -4,7 +4,7 @@
 
 Helmsman is a **Claude Code-native plugin** that turns your workflow into a structured, agent-driven SDLC. You bring a PRD (or a bug report, or a vague idea). Helmsman guides you — through discovery, design, implementation, and review — producing not just code, but a complete **dossier** of artifacts that any developer can read to understand the why, what, and how.
 
-**Version 1.4.0** — Feature-complete. All seven pipeline modes, quality gates, lifecycle hooks, skill marketplace, and performance-tuned context loading.
+Feature-complete. All seven pipeline modes, quality gates, lifecycle hooks, skill marketplace, and performance-tuned context loading.
 
 ---
 
@@ -37,30 +37,11 @@ Each stage is gated: nothing advances until you approve. Every decision is logge
 - A directory to use as your Helmsman workspace (sibling to your repos)
 - bash ≥ 3.2 (for lifecycle hooks — optional but recommended)
 
-### Option A — From source (recommended)
+### Install from Marketplace
 
 ```bash
-# 1. Clone the plugin
-git clone https://github.com/helmsman-contributors/helmsman ~/helmsman-plugin
-
-# 2. Register it as a local marketplace in Claude Code
-/plugin marketplace add ~/helmsman-plugin
-
-# 3. Install the plugin
+/plugin marketplace add helmsman-ai/helmsman-claude-plugin
 /plugin install helmsman
-```
-
-### Option B — Development / local path
-
-```
-/plugin marketplace add /path/to/helmsman
-/plugin install helmsman
-```
-
-Or load for a single session without installing:
-
-```bash
-claude --plugin-dir /path/to/helmsman
 ```
 
 ### First-Run Setup
@@ -76,16 +57,6 @@ The wizard:
 4. Optionally imports existing `CLAUDE.md` content as initial memory
 
 > **Tip:** If commands don't appear after install, run `/reload-plugins`.
-
----
-
-## Updating
-
-```bash
-cd ~/helmsman-plugin && git pull
-```
-
-Then in Claude Code: `/reload-plugins`
 
 ---
 
