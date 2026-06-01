@@ -64,5 +64,38 @@
     "./modes/experiment.yaml",
     "./modes/hotfix.yaml",
     "./modes/chore.yaml"
-  ]
+  ],
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./hooks/inject-state.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./hooks/pre-push-guard.sh"
+          }
+        ]
+      }
+    ],
+"Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./hooks/stop-log.sh"
+          }
+        ]
+      }
+    ]
+  }
 }
