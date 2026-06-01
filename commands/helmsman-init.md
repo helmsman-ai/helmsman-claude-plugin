@@ -2,8 +2,9 @@
 name: helmsman-init
 description: >
   First-run setup wizard. Creates the workspace directory structure, writes
-  manifest.yaml, scaffolds memory/ and templates/ directories, and registers
-  the first repository. Safe to re-run — will not overwrite existing data.
+  manifest.yaml, scaffolds memory/ and templates/ directories, registers
+  the first repository, and optionally initializes git and recommends the
+  GitHub connector. Safe to re-run — will not overwrite existing data.
 arguments:
   - name: --workspace
     description: Path to use as the Helmsman workspace root. Defaults to ~/helmsman-workspace.
@@ -175,7 +176,64 @@ If user skips repo registration entirely (presses Enter or says "skip"):
 
 > No repos registered. You can add them later by editing `manifest.yaml` directly, or by running `/helmsman-init` again.
 
-### Step 6 — Optional: install lifecycle hooks
+### Step 6 — Optional: initialize git and recommend the GitHub connector
+
+This step only runs if at least one repo was registered in Step 5. Skip it entirely otherwise.
+
+**6a — Offer `git init` for non-git repos.**
+
+For each registered repo whose path exists on disk, check whether it is already a git repository:
+
+```bash
+git -C <repo-path> rev-parse --is-inside-work-tree 2>/dev/null
+```
+
+- If the command succeeds (prints `true`): the repo is already under git — skip it silently.
+- If the path does not exist on disk: skip it silently (it was registered as a future/placeholder path).
+- If the command fails (not a git repo): offer to initialize one.
+
+For each repo that is **not** yet a git repository, ask:
+
+> `<repo-name>` (`<repo-path>`) is not a git repository yet.
+> Helmsman's pre-push guard and structured commits work best with git.
+> Initialize a git repository here now? (yes/no)
+
+If **yes**:
+
+```bash
+git -C <repo-path> init
+```
+
+Report: `✅ Initialized git repository in <repo-path>`
+
+Do **not** create commits, add files, or change branches — only `git init`. Leave staging and the first commit to the user.
+
+If **no**: skip that repo and continue.
+
+**6b — Recommend the GitHub connector.**
+
+After handling git for all repos, print the following recommendation once (regardless of how many repos were initialized):
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  RECOMMENDED: GitHub connector
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Helmsman's later stages (pre-launch, launch) work best when Claude
+can open pull requests, read issues, and check CI status directly.
+
+The GitHub connector gives Claude Code that access. To add it:
+
+  • Run /mcp inside Claude Code and follow the GitHub connector setup, or
+  • See https://docs.claude.com/en/docs/claude-code/mcp for connector setup.
+
+This is optional — Helmsman works without it, falling back to the
+`gh` CLI and local git when the connector is absent.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+This is informational only — do not attempt to install or configure the connector automatically.
+
+### Step 7 — Optional: install lifecycle hooks
 
 Ask:
 
@@ -258,7 +316,11 @@ If no: skip.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Workspace:  <workspace-path>
 Repos:      <repo-names or "none registered">
+Git:        <"initialized: <repo-names>" | "already tracked" | "skipped">
 Hooks:      <"installed (global)" | "installed (workspace)" | "skipped">
+GitHub:     <"connector recommended — see /mcp" | "n/a">
+
+
 
 What's ready:
   ✅ manifest.yaml
@@ -300,6 +362,7 @@ See docs/HOOKS.md for hook configuration details.
 | `memory/patterns/`       | Skip if exists; never delete existing pattern files |
 | `templates/` files       | Skip individual files that exist; copy missing ones |
 | `projects/`              | Skip — never touch existing projects                |
+| Git repo (`.git/`)       | Skip if already a git repo; offer `git init` only for untracked repos |
 | Hooks in `settings.json` | Append only — never remove existing hook entries    |
 
 ---
@@ -313,7 +376,8 @@ See docs/HOOKS.md for hook configuration details.
 | `<workspace>/memory/repos/<name>.md` | Created per repo registered                |
 | `<workspace>/memory/patterns/`       | Created as empty directory                 |
 | `<workspace>/templates/*`            | Copied from plugin templates if not exists |
-| `~/.claude/settings.json` or `<workspace>/.claude/settings.json` | Hook entries appended if user accepts Step 6 |
+| `<repo-path>/.git/`                  | Created via `git init` per repo if user accepts in Step 6a (never auto-commits) |
+| `~/.claude/settings.json` or `<workspace>/.claude/settings.json` | Hook entries appended if user accepts Step 7 |
 
 ---
 
