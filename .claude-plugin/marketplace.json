@@ -1,8 +1,8 @@
 {
-  "name": "helmsman",
+  "name": "helmsman-ai",
   "description": "Agentic SDLC workspace for Claude Code — guides developers from PRD to shipped code with a durable artifact dossier",
   "owner": {
-    "name": "helmsman"
+    "name": "helmsman-ai"
   },
   "plugins": [
     {
