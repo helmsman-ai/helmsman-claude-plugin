@@ -1,0 +1,68 @@
+mode: bugfix
+label: "Bug Fix"
+description: "Structured path from bug report to verified fix — researcher confirms root cause before any fix is planned"
+fast_track: false
+
+defaults:
+  gate_strictness: balanced
+  require_tests: true
+  branch_pattern: "helmsman/{project}"
+
+stages:
+  - id: "01-bug-intake"
+    label: "Bug Intake"
+    agent: null
+    skill: null
+    gates:
+      - id: has_reproduction_steps
+        severity: hard
+      - id: has_expected_vs_actual
+        severity: hard
+      - id: has_affected_version
+        severity: soft
+
+  - id: "02-reproduce"
+    label: "Reproduce & Diagnose"
+    agent: researcher
+    skill: bugfix/reproduce
+    gates:
+      - id: has_root_cause
+        severity: hard
+      - id: has_impacted_code_paths
+        severity: soft
+
+  - id: "03-fix-plan"
+    label: "Fix Plan"
+    agent: architect
+    skill: bugfix/fix-plan
+    gates:
+      - id: has_fix_approach
+        severity: hard
+      - id: has_regression_risk
+        severity: soft
+
+  - id: "04-implementation"
+    label: "Implementation"
+    agent: implementer
+    skill: implementation
+    gates:
+      - id: tests_pass
+        severity: hard
+      - id: lint_clean
+        severity: soft
+
+  - id: "05-review"
+    label: "Code Review"
+    agent: reviewer
+    skill: code-review
+    gates:
+      - id: no_critical_issues
+        severity: hard
+
+  - id: "06-launch"
+    label: "Launch"
+    agent: null
+    skill: null
+    gates:
+      - id: rollback_plan_exists
+        severity: hard

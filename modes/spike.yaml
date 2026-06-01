@@ -1,0 +1,56 @@
+mode: spike
+label: "Spike"
+description: "Time-boxed investigation to answer a specific technical question — produces a recommendation, not production code"
+fast_track: false
+
+defaults:
+  gate_strictness: balanced
+  require_tests: false
+  branch_pattern: "helmsman/{project}"
+
+stages:
+  - id: "01-question"
+    label: "Question"
+    agent: null
+    skill: null
+    gates:
+      - id: has_question
+        severity: hard
+      - id: has_success_criteria
+        severity: hard
+      - id: has_time_box
+        severity: soft
+
+  - id: "02-investigation"
+    label: "Investigation"
+    agent: researcher
+    skill: spike/investigation
+    gates:
+      - id: has_codebase_findings
+        severity: soft
+      - id: has_external_research
+        severity: soft
+
+  - id: "03-findings"
+    label: "Findings"
+    agent: researcher
+    skill: spike/findings
+    gates:
+      - id: has_findings
+        severity: hard
+      - id: has_options
+        severity: soft
+
+  - id: "04-recommendation"
+    label: "Recommendation"
+    agent: architect
+    skill: spike/recommendation
+    gates:
+      - id: has_decision
+        severity: hard
+
+  - id: "05-close"
+    label: "Close"
+    agent: null
+    skill: null
+    gates: []

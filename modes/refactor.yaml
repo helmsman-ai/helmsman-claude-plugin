@@ -1,0 +1,76 @@
+mode: refactor
+label: "Refactor"
+description: "Restructure existing code without changing observable behavior — researcher maps the current state before architect designs the target"
+fast_track: false
+
+defaults:
+  gate_strictness: balanced
+  require_tests: true
+  branch_pattern: "helmsman/{project}"
+
+stages:
+  - id: "01-intake"
+    label: "Intake"
+    agent: null
+    skill: null
+    gates:
+      - id: has_motivation
+        severity: hard
+      - id: has_scope
+        severity: hard
+
+  - id: "02-current-state"
+    label: "Current State"
+    agent: researcher
+    skill: refactor/current-state
+    gates:
+      - id: has_pain_points
+        severity: hard
+      - id: has_impacted_files
+        severity: soft
+
+  - id: "03-target-design"
+    label: "Target Design"
+    agent: architect
+    skill: refactor/target-design
+    gates:
+      - id: has_target_design
+        severity: hard
+      - id: has_adrs
+        severity: soft
+
+  - id: "04-migration-plan"
+    label: "Migration Plan"
+    agent: architect
+    skill: task-breakdown
+    gates:
+      - id: each_task_has_acceptance_criteria
+        severity: hard
+      - id: dependency_graph_valid
+        severity: hard
+
+  - id: "05-implementation"
+    label: "Implementation"
+    agent: implementer
+    skill: implementation
+    gates:
+      - id: tests_pass
+        severity: hard
+      - id: lint_clean
+        severity: soft
+
+  - id: "06-review"
+    label: "Code Review"
+    agent: reviewer
+    skill: code-review
+    gates:
+      - id: no_critical_issues
+        severity: hard
+
+  - id: "07-launch"
+    label: "Launch"
+    agent: null
+    skill: null
+    gates:
+      - id: rollback_plan_exists
+        severity: hard

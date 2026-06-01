@@ -1,0 +1,191 @@
+# state.yaml — Project State File
+#
+# One file per project, lives at: projects/<project-name>/state.yaml
+# The Orchestrator is the ONLY writer of this file.
+# Never edit this file manually — use slash commands (/approve, /advance, etc.)
+#
+# This example shows a project mid-flight: PRD + Discovery approved,
+# Tech Design currently in review.
+#
+# See: docs/SCHEMAS.md for full field documentation.
+
+# ---------------------------------------------------------------------------
+# Project identity — supports single-repo and multi-repo projects
+# ---------------------------------------------------------------------------
+project: feature-payments-v2            # matches the projects/ subdirectory name
+mode: feature                           # feature only in MVP; more modes in v1
+created_at: "2025-01-15T09:00:00Z"      # ISO 8601, set at /start-project
+
+linked_repos:
+  - payments-service                    # must match a name in manifest.yaml
+  - web-app
+
+# Populated by Orchestrator at /start-project; one entry per linked repo, never empty.
+repo_branches:
+  payments-service: helmsman/feature-payments-v2   # one branch per repo, named helmsman/<project>
+  web-app: helmsman/feature-payments-v2            # same project name, different repo
+
+linked_jira: PAY-1234                   # optional; null if not using Jira
+
+# ---------------------------------------------------------------------------
+# Stage tracking
+# ---------------------------------------------------------------------------
+current_stage: "04-tech-design"         # the stage currently active
+
+stages:
+  "01-prd":
+    status: complete                    # pending | in-progress | in-review | complete | skipped
+    started_at: "2025-01-15T09:00:00Z"
+    approved_at: "2025-01-15T09:05:00Z"
+    approved_by: user                   # always "user" in MVP (human approval only)
+
+  "02-prd-clean":
+    status: complete
+    started_at: "2025-01-15T09:05:00Z"
+    approved_at: "2025-01-15T11:30:00Z"
+    approved_by: user
+    gate_results:
+      has_goals: pass
+      has_acceptance_criteria: pass
+      has_user_stories: pass
+      has_constraints: pass
+
+  "03-discovery":
+    status: complete
+    started_at: "2025-01-15T11:30:00Z"
+    approved_at: "2025-01-15T15:00:00Z"
+    approved_by: user
+
+  "04-tech-design":
+    status: in-review                   # agent has produced artifacts; awaiting /approve
+    started_at: "2025-01-15T15:00:00Z"
+    approved_at: null
+    approved_by: null
+    gate_results:
+      has_2_alternatives: pass
+      has_risks_section: pass
+      has_adrs: pass
+
+  "05-tasks":
+    status: pending
+    started_at: null
+    approved_at: null
+    approved_by: null
+
+  "06-implementation":
+    status: pending
+    started_at: null
+    approved_at: null
+    approved_by: null
+    tasks_total: null
+    tasks_complete: null
+
+  "07-review":
+    status: pending
+    started_at: null
+    approved_at: null
+    approved_by: null
+
+  "08-pre-launch":
+    status: pending
+    started_at: null
+    approved_at: null
+    approved_by: null
+
+  "09-launch":
+    status: pending
+    started_at: null
+    approved_at: null
+    approved_by: null
+
+# ---------------------------------------------------------------------------
+# Gate configuration — per-project quality gate settings (v1.M4)
+# ---------------------------------------------------------------------------
+gate_config:
+  # Override the mode's default strictness for this project.
+  # strict   → all soft gates become hard (block on failure)
+  # balanced → gates use their declared severities (default)
+  # lenient  → all hard gates become soft (warn, do not block)
+  strictness: balanced
+
+  # Per-gate severity overrides: fine-grained control over individual gates.
+  # Each entry changes one gate's severity for the lifetime of this project.
+  # Use /override-gate to add entries here.
+  gate_overrides: []
+  # Example entries:
+  #   - gate: has_adrs
+  #     stage: "04-tech-design"
+  #     severity: hard          # escalate from soft → hard
+  #     reason: "Team policy: ADRs required for all arch decisions"
+  #     set_by: user
+  #     set_at: "2026-05-24T10:00:00Z"
+  #
+  #   - gate: has_user_stories
+  #     stage: "02-prd-clean"
+  #     severity: skip          # skip this gate entirely
+  #     reason: "Internal tool, no user stories applicable"
+  #     set_by: user
+  #     set_at: "2026-05-24T10:00:00Z"
+
+# ---------------------------------------------------------------------------
+# Skip and override tracking (v1 — forward-compat; audit log in v1.M4)
+# ---------------------------------------------------------------------------
+skipped_stages: []                      # e.g. ["03-discovery"]
+
+# Append-only audit log of one-time gate bypasses at /advance time.
+# Written by /override-gate --bypass or when user confirms override interactively.
+gates_overridden: []
+# Example entry (one-time bypass at advance time):
+#   - at: "2026-05-24T14:30:00Z"
+#     stage: "04-tech-design"
+#     gate: has_2_alternatives
+#     original_severity: hard
+#     override_type: bypass       # bypass | downgrade | skip
+#     reason: "Trivial UI color change — only one option makes sense"
+#     by: user
+
+# ---------------------------------------------------------------------------
+# History — append-only log of every state transition
+# ---------------------------------------------------------------------------
+history:
+  - at: "2025-01-15T09:05:00Z"
+    action: approved
+    stage: "01-prd"
+    note: "PRD input saved"
+
+  - at: "2025-01-15T11:30:00Z"
+    action: approved
+    stage: "02-prd-clean"
+    note: "Clarified SLA requirement; refunds deferred to v2"
+
+  - at: "2025-01-15T15:00:00Z"
+    action: approved
+    stage: "03-discovery"
+    note: "Added rate-limiting service as dependency"
+
+  - at: "2025-01-15T15:00:00Z"
+    action: advanced
+    from_stage: "03-discovery"
+    to_stage: "04-tech-design"
+    note: "Architect agent started"
+
+# ---------------------------------------------------------------------------
+# Propagation tracking (v1.M2)
+# ---------------------------------------------------------------------------
+propagation:
+  stale_stages: []                    # populated by /jump-back; cleared by /propagate
+  in_progress: false                  # true while /propagate is mid-run
+  last_jump_back: null                # when populated:
+                                      #   at: "2026-05-23T14:30:00Z"
+                                      #   from_stage: "04-tech-design"
+                                      #   to_stage: "02-prd-clean"
+                                      #   reason: "Changed auth to JWT"
+
+snapshots: []                         # append-only; example entry:
+                                      # - id: "20260523-143022-04-tech-design"
+                                      #   stage: "04-tech-design"
+                                      #   created_at: "2026-05-23T14:30:22Z"
+                                      #   trigger: "propagate"
+                                      #   reason: "Propagating jump-back"
+                                      #   diff_path: null              # null until diff produced; then: ".snapshots/<id>/DIFF.md"
+                                      #   restored: false

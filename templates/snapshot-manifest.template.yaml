@@ -1,0 +1,39 @@
+# Snapshot Manifest — Helmsman v1.M2
+#
+# Lives at: projects/<project>/.snapshots/<snapshot-id>/MANIFEST.yaml
+# Written by the Orchestrator before every propagation re-run.
+# Never edit manually.
+#
+# Snapshot ID format: YYYYMMDD-HHMMSS-<stage-id>
+# Example:            20260523-143022-04-tech-design
+#
+# Note: This file (MANIFEST.yaml) contains fields beyond those mirrored in
+# state.yaml snapshots[] — specifically `project`, `files`, and
+# `upstream_context`. The state.yaml log entry records only the 7 fields
+# defined in docs/SCHEMAS.md (id, stage, created_at, trigger, reason,
+# diff_path, restored). MANIFEST.yaml is intentionally richer.
+
+id: "{{YYYYMMDD-HHMMSS}}-{{stage-id}}"    # e.g. "20260523-143022-04-tech-design"
+project: "{{project-name}}"                # matches the projects/ subdirectory name
+stage: "{{stage-id}}"                      # e.g. "04-tech-design"
+created_at: "{{ISO 8601}}"                 # e.g. "2026-05-23T14:30:22Z"
+trigger: "{{propagate | manual}}"          # one of: "propagate", "manual"
+reason: "{{human-readable reason}}"        # e.g. "Propagating jump-back from 02-prd-clean"
+
+# Files captured in this snapshot.
+# Paths are relative to the project root (projects/<project-name>/).
+files:
+  - "{{stage-dir}}/{{filename}}"           # e.g. "04-tech-design/design.md"
+
+# Populated after the propagation re-run produces new artifacts.
+# Null until the diff is written.
+diff_path: null                            # set to ".snapshots/<id>/DIFF.md" after re-run
+
+# Set to true if this snapshot was restored (user rejected the propagated version).
+restored: false
+
+# Upstream stage context at the time this snapshot was taken.
+# Recorded for traceability — shows which approved versions the re-run was based on.
+upstream_context:
+  - stage: "{{stage-id}}"                  # e.g. "02-prd-clean"
+    approved_at: "{{ISO 8601}}"            # e.g. "2026-05-23T09:00:00Z"

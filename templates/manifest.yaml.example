@@ -1,0 +1,57 @@
+# manifest.yaml — Helmsman Workspace Registry
+#
+# This file is the single source of truth for:
+#   - Global defaults that apply to all projects
+#   - The set of repos this workspace knows about
+#
+# Copy this file to your workspace root as `manifest.yaml` and edit it.
+# The `manifest.yaml` file itself is gitignored (it contains local paths).
+# Commit `manifest.yaml.example` as the canonical reference.
+#
+# See: docs/SCHEMAS.md for full field documentation.
+
+version: 1
+
+# ---------------------------------------------------------------------------
+# Global defaults — applied to all projects unless overridden in state.yaml
+# ---------------------------------------------------------------------------
+defaults:
+  default_mode: feature                  # feature | bugfix | refactor | spike | experiment | hotfix | chore
+  reviewer_strictness: balanced          # strict | balanced | lenient
+  auto_push: false                       # never push to remote without explicit /push command
+  require_tests: true                    # block implementation advance if tests are absent
+  default_branch_pattern: "helmsman/{project}"   # git branch naming; applied per repo for multi-repo projects
+
+# ---------------------------------------------------------------------------
+# Repos — register every codebase this workspace can work with
+# ---------------------------------------------------------------------------
+repos:
+  - name: payments-service               # short identifier used in state.yaml `linked_repos`
+    path: ~/code/payments                # absolute or ~ path to the repo root
+    primary_language: typescript
+    tech_stack:
+      - node
+      - postgres
+      - redis
+    conventions_file: CONVENTIONS.md    # relative path inside the repo; null if absent
+    memory_file: memory/repos/payments-service.md  # relative to workspace root
+
+  - name: web-app
+    path: ~/code/web
+    primary_language: typescript
+    tech_stack:
+      - react
+      - nextjs
+      - tailwind
+    conventions_file: docs/CONVENTIONS.md
+    memory_file: memory/repos/web-app.md
+
+  - name: backend-api
+    path: ~/code/api
+    primary_language: python
+    tech_stack:
+      - fastapi
+      - sqlalchemy
+      - celery
+    conventions_file: null               # no conventions file yet — Helmsman will ask on first use
+    memory_file: memory/repos/backend-api.md

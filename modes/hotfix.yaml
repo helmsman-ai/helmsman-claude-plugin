@@ -1,0 +1,40 @@
+mode: hotfix
+label: "Hotfix"
+description: "Emergency production fix — auto-advancing pipeline, hard gates downgraded to warnings, minimum viable process"
+fast_track: true
+
+defaults:
+  gate_strictness: lenient
+  require_tests: true
+  branch_pattern: "helmsman/{project}"
+
+stages:
+  - id: "01-intake"
+    label: "Incident Intake"
+    agent: null
+    skill: null
+    gates:
+      - id: has_incident_description
+        severity: hard
+
+  - id: "02-fix"
+    label: "Fix"
+    agent: implementer
+    skill: hotfix/fix
+    gates:
+      - id: tests_pass
+        severity: hard
+
+  - id: "03-review"
+    label: "Review"
+    agent: reviewer
+    skill: code-review
+    gates:
+      - id: no_critical_issues
+        severity: hard
+
+  - id: "04-deploy"
+    label: "Deploy"
+    agent: null
+    skill: null
+    gates: []

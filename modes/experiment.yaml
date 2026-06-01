@@ -1,0 +1,64 @@
+mode: experiment
+label: "Experiment"
+description: "Build and measure to test a hypothesis — produces a ship/discard/pivot decision with recorded evidence"
+fast_track: false
+
+defaults:
+  gate_strictness: balanced
+  require_tests: true
+  branch_pattern: "helmsman/{project}"
+
+stages:
+  - id: "01-hypothesis"
+    label: "Hypothesis"
+    agent: null
+    skill: null
+    gates:
+      - id: has_hypothesis
+        severity: hard
+      - id: has_success_metrics
+        severity: hard
+      - id: has_time_box
+        severity: hard
+
+  - id: "02-design"
+    label: "Experiment Design"
+    agent: architect
+    skill: experiment/design
+    gates:
+      - id: has_experiment_design
+        severity: hard
+
+  - id: "03-implementation"
+    label: "Implementation"
+    agent: implementer
+    skill: implementation
+    gates:
+      - id: tests_pass
+        severity: hard
+      - id: lint_clean
+        severity: soft
+
+  - id: "04-results"
+    label: "Results"
+    agent: researcher
+    skill: experiment/results
+    gates:
+      - id: has_results
+        severity: hard
+      - id: has_metrics_comparison
+        severity: soft
+
+  - id: "05-decision"
+    label: "Decision"
+    agent: null
+    skill: null
+    gates:
+      - id: has_ship_decision
+        severity: hard
+
+  - id: "06-close"
+    label: "Close"
+    agent: null
+    skill: null
+    gates: []

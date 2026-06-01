@@ -1,0 +1,94 @@
+mode: feature
+label: "Feature"
+description: "Full SDLC pipeline for a new feature — from PRD to shipped code"
+fast_track: false
+
+defaults:
+  gate_strictness: balanced
+  require_tests: true
+  branch_pattern: "helmsman/{project}"
+
+stages:
+  - id: "01-prd"
+    label: "PRD Intake"
+    agent: null
+    skill: null
+    gates: []
+
+  - id: "02-prd-clean"
+    label: "PRD Review"
+    agent: prd-reviewer
+    skill: prd-review
+    gates:
+      - id: has_goals
+        severity: hard
+      - id: has_acceptance_criteria
+        severity: hard
+      - id: has_user_stories
+        severity: soft
+      - id: has_constraints
+        severity: soft
+
+  - id: "03-discovery"
+    label: "Discovery"
+    agent: researcher
+    skill: discovery
+    gates:
+      - id: has_decision_makers
+        severity: soft
+
+  - id: "04-tech-design"
+    label: "Tech Design"
+    agent: architect
+    skill: tech-design
+    gates:
+      - id: has_2_alternatives
+        severity: hard
+      - id: has_risks_section
+        severity: hard
+      - id: has_adrs
+        severity: soft
+
+  - id: "05-tasks"
+    label: "Task Breakdown"
+    agent: architect
+    skill: task-breakdown
+    gates:
+      - id: each_task_has_acceptance_criteria
+        severity: hard
+      - id: dependency_graph_valid
+        severity: hard
+
+  - id: "06-implementation"
+    label: "Implementation"
+    agent: implementer
+    skill: implementation
+    gates:
+      - id: tests_pass
+        severity: hard
+      - id: lint_clean
+        severity: soft
+
+  - id: "07-review"
+    label: "Code Review"
+    agent: reviewer
+    skill: code-review
+    gates:
+      - id: no_critical_issues
+        severity: hard
+
+  - id: "08-pre-launch"
+    label: "Pre-Launch"
+    agent: null
+    skill: null
+    gates:
+      - id: pre_mortem_complete
+        severity: hard
+      - id: rollback_plan_exists
+        severity: hard
+
+  - id: "09-launch"
+    label: "Launch"
+    agent: null
+    skill: null
+    gates: []

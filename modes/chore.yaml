@@ -1,0 +1,40 @@
+mode: chore
+label: "Chore"
+description: "Dependency bump, config change, or tooling update — no design needed, lenient gates"
+fast_track: false
+
+defaults:
+  gate_strictness: lenient
+  require_tests: false
+  branch_pattern: "helmsman/{project}"
+
+stages:
+  - id: "01-intake"
+    label: "Chore Intake"
+    agent: null
+    skill: null
+    gates:
+      - id: has_chore_description
+        severity: hard
+
+  - id: "02-implementation"
+    label: "Implementation"
+    agent: implementer
+    skill: implementation
+    gates:
+      - id: lint_clean
+        severity: soft
+
+  - id: "03-review"
+    label: "Review"
+    agent: reviewer
+    skill: chore/review
+    gates:
+      - id: no_critical_issues
+        severity: hard
+
+  - id: "04-close"
+    label: "Close"
+    agent: null
+    skill: null
+    gates: []
