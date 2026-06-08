@@ -1,7 +1,7 @@
 {
   "name": "helmsman",
   "description": "Agentic SDLC workspace for Claude Code — guides developers from PRD to shipped code with a durable artifact dossier",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": {
     "name": "helmsman-contributors"
   },
@@ -64,38 +64,5 @@
     "./modes/experiment.yaml",
     "./modes/hotfix.yaml",
     "./modes/chore.yaml"
-  ],
-  "hooks": {
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/inject-state.sh"
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/pre-push-guard.sh"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/stop-log.sh"
-          }
-        ]
-      }
-    ]
-  }
+  ]
 }
